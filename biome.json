@@ -1,0 +1,30 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": true,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 120,
+		"attributePosition": "auto",
+		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"]
+	},
+	"linter": {
+		"enabled": true,
+		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"],
+		"rules": {
+			"recommended": true
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"trailingComma": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always"
+		}
+	}
+}
