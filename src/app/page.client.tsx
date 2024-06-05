@@ -17,7 +17,7 @@ export default function DistrictDialog({ children }: { children: React.ReactNode
 	const [subdomain, setSubdomain] = useLocalStorage("subdomain", "app");
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger>{children}</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Get Credentials</AlertDialogTitle>

@@ -4,8 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 
-const fontSans = Inter({ variable: "--font-sans" });
-const fontMono = JetBrains_Mono({ variable: "--font-mono" });
+const fontSans = Inter();
+// const fontMono = JetBrains_Mono();
 
 export const metadata: Metadata = {
 	title: "Schoology",
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${fontSans.variable} ${fontMono.variable}`}>
+			<body className={`${fontSans.className} h-screen`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
