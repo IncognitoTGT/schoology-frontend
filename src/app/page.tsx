@@ -8,12 +8,10 @@ import type { Credentials } from "@/types/cookies";
 import { redirect } from "next/navigation";
 
 export default function Index() {
-	const creds = cookies().get("credentials")?.value
+	const creds = cookies().get("credentials")?.value;
 	if (creds) {
-	const parsedCreds: Credentials = JSON.parse(creds)
-	if (parsedCreds.cKey && parsedCreds.cSecret) {
-		redirect("/home")
-	}
+		const parsedCreds: Credentials = JSON.parse(creds);
+		if (parsedCreds.cKey && parsedCreds.cSecret) redirect("/home");
 	}
 	return (
 		<main className="flex h-full justify-center items-center">

@@ -1,23 +1,35 @@
 import type { Credentials } from "@/types/cookies";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import OAuth from "oauth-1.0a";
 
 export function getSchoology() {
 	const authCookie = cookies().get("credentials");
-	const { cKey, cSecret }: Credentials = JSON.parse(authCookie?.value as string);
-	if (!cKey || !cSecret) return redirect("/")
-	return async (path: string) =>
-		(
-			await fetch(`https://api.schoology.com/v1${path}`, {
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-					Authorization: `OAuth realm="Schoology%20API",oauth_consumer_key="${cKey}",oauth_signature_method="PLAINTEXT",oauth_timestamp="${Math.floor(
-						Date.now() / 1000,
-					)}",oauth_nonce="${
-						Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-					}",oauth_version="1.0",oauth_signature="${cSecret}%26"`,
-				},
-			})
-		).json();
+	if (!authCookie) return redirect("/");
+	const { cKey, cSecret }: Credentials = JSON.parse(authCookie.value);
+	if (!cKey || !cSecret) return redirect("/");
+	const oauth = new OAuth({
+		consumer: { key: cKey, secret: cSecret },
+		signature_method: "PLAINTEXT",
+		realm: "Schoology API",
+		hash_function: (_base_string, key) => key,
+	});
+	const headers = () => ({
+		"Content-Type": "application/json",
+		Accept: "application/json",
+		...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
+	});
+	return async (path: string) => {
+		const res = await fetch(`https://api.schoology.com/v1${path}`, {
+			headers: headers(),
+		});
+		if (res.redirected) {
+			return (
+				await fetch(res.url, {
+					headers: headers(),
+				})
+			).json();
+		}
+		return res.json();
+	};
 }
