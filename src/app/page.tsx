@@ -6,6 +6,7 @@ import DistrictDialog from "./page.client";
 import { cookies } from "next/headers";
 import type { Credentials } from "@/types/cookies";
 import { redirect } from "next/navigation";
+import { unstable_after as after } from 'next/server'
 
 export default function Index() {
 	const creds = cookies().get("credentials")?.value;
@@ -28,6 +29,7 @@ export default function Index() {
 					<form
 						action={async (data: FormData) => {
 							"use server";
+							after(() => redirect("/home"));
 							const cKey = data.get("cKey")?.toString();
 							const cSecret = data.get("cSecret")?.toString();
 							if (cKey && cSecret) {
