@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
-const fontSans = Inter({subsets: ["latin"]});
+const fontSans = Inter({ subsets: ["latin"] });
 // const fontMono = JetBrains_Mono();
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body className={`${fontSans.className} h-screen`}>
 				<ThemeProvider
 					attribute="class"

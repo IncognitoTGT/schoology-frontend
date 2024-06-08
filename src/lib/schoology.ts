@@ -1,6 +1,6 @@
 import type { Credentials } from "@/types/cookies";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import OAuth from "oauth-1.0a";
 
 export function getSchoology() {
@@ -19,13 +19,15 @@ export function getSchoology() {
 		Accept: "application/json",
 		...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
 	});
-	return async (path: string) => {
+	return async (path: string, method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | undefined) => {
 		const res = await fetch(`https://api.schoology.com/v1${path}`, {
+			method,
 			headers: headers(),
 		});
 		if (res.redirected) {
 			return (
 				await fetch(res.url, {
+					method,
 					headers: headers(),
 				})
 			).json();

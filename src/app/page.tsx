@@ -6,7 +6,7 @@ import DistrictDialog from "./page.client";
 import { cookies } from "next/headers";
 import type { Credentials } from "@/types/cookies";
 import { redirect } from "next/navigation";
-import { unstable_after as after } from 'next/server'
+import { unstable_after as after } from "next/server";
 
 export default function Index() {
 	const creds = cookies().get("credentials")?.value;
