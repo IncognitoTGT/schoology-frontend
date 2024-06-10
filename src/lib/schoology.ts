@@ -2,8 +2,19 @@ import type { Credentials } from "@/types/cookies";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import OAuth from "oauth-1.0a";
-
-export function getSchoology() {
+/**
+ * @param contentType Request path
+ **/
+type SchoologyRequestInit = RequestInit & {
+	contentType?: string | undefined;
+};
+/**
+ * @param path Request path
+ * @param options Request options
+ * @returns The response from the API, either as a JSON object or an error message
+ */
+type SchoologyInstance = (path: string, options?: SchoologyRequestInit | undefined) => Promise<any>;
+export function getSchoology(): SchoologyInstance {
 	const authCookie = cookies().get("credentials");
 	if (!authCookie) return redirect("/");
 	const { cKey, cSecret }: Credentials = JSON.parse(authCookie.value);
@@ -14,24 +25,24 @@ export function getSchoology() {
 		realm: "Schoology API",
 		hash_function: (_base_string, key) => key,
 	});
-	const headers = () => ({
-		"Content-Type": "application/json",
+	const headers = (contentType?: string | undefined) => ({
+		"Content-Type": contentType || "application/json",
 		Accept: "application/json",
 		...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
 	});
-	return async (path: string, method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | undefined) => {
-		const res = await fetch(`https://api.schoology.com/v1${path}`, {
-			method,
-			headers: headers(),
+	return (async (path: string, { contentType, ...options }: SchoologyRequestInit | undefined = {}) => {
+		const responseOpts = (): RequestInit => ({
+			...options,
+			headers: headers(contentType),
 		});
-		if (res.redirected) {
-			return (
-				await fetch(res.url, {
-					method,
-					headers: headers(),
-				})
-			).json();
+		let res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
+		if (res.status === 429) {
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+			res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
+		}
+		if ([401, 403].includes(res.status)) {
+			return { error: await res.text() };
 		}
 		return res.json();
-	};
+	}) as SchoologyInstance;
 }

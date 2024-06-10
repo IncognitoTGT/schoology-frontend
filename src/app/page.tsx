@@ -1,14 +1,22 @@
+import { signOut } from "@/actions/accounts";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import DistrictDialog from "./page.client";
-import { cookies } from "next/headers";
+import { getSchoology } from "@/lib/schoology";
 import type { Credentials } from "@/types/cookies";
-import { redirect } from "next/navigation";
-import { unstable_after as after } from "next/server";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
+import { cookies } from "next/headers";
+import { redirect, unstable_rethrow } from "next/navigation";
+import DistrictDialog from "./page.client";
 
-export default function Index() {
+export default function Index({
+	searchParams,
+}: {
+	searchParams: { [key: string]: string | string[] | undefined };
+}) {
+	const { error } = searchParams;
 	const creds = cookies().get("credentials")?.value;
 	if (creds) {
 		const parsedCreds: Credentials = JSON.parse(creds);
@@ -25,18 +33,30 @@ export default function Index() {
 						</DistrictDialog>
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="flex flex-col gap-2">
+					{error ? (
+						<Alert variant="destructive" className="w-full text-destructive">
+							<CrossCircledIcon className="h-4 w-4" />
+							<AlertTitle>Error logging in:</AlertTitle>
+							<AlertDescription>{error}</AlertDescription>
+						</Alert>
+					) : null}
 					<form
+						className="flex flex-col gap-2 w-full"
 						action={async (data: FormData) => {
 							"use server";
-							after(() => redirect("/home"));
 							const cKey = data.get("cKey")?.toString();
 							const cSecret = data.get("cSecret")?.toString();
 							if (cKey && cSecret) {
 								cookies().set("credentials", JSON.stringify({ cKey, cSecret } as Credentials));
-								return { success: true, message: "Credentials saved" };
+								const schoology = getSchoology();
+								const req = await schoology("/app-user-info");
+								if (req.error) {
+									return signOut(undefined, req.error);
+								}
+								cookies().set("userId", req.api_uid);
+								return redirect("/home");
 							}
-							return { success: false, message: "Invalid credentials" };
 						}}
 					>
 						<Label htmlFor="cKey">Consumer key</Label>

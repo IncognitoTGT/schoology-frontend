@@ -1,7 +1,8 @@
+"use client";
 import { signOut } from "@/actions/accounts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavLink } from "@/components/ui/nav-link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -10,11 +11,14 @@ import {
 	ExitIcon,
 	GitHubLogoIcon,
 	HomeIcon,
+	MoonIcon,
 	Pencil2Icon,
 	PersonIcon,
 	RocketIcon,
+	SunIcon,
 } from "@radix-ui/react-icons";
 import type { IconProps } from "@radix-ui/react-icons/dist/types";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 export default function Navigation({
@@ -22,8 +26,8 @@ export default function Navigation({
 	user,
 	messages,
 	messageSenders,
-	// biome-ignore lint: typescritp
 }: { school: any; user: any; messages: any; messageSenders: any[] }) {
+	const { theme, themes, setTheme } = useTheme();
 	const navItems: {
 		Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
 		label: string;
@@ -69,14 +73,13 @@ export default function Navigation({
 								<SheetHeader>
 									<SheetTitle>Messages</SheetTitle>
 								</SheetHeader>
-								{/* biome-ignore lint:  */}
 								{messages.message.map((message: any, index: number) => (
-									<Card key={message.id} className="w-full h-24">
+									<Card key={message.id} className="w-full h-auto">
 										<CardHeader>
 											<CardTitle>{messageSenders[index].name_display}</CardTitle>
 											<CardDescription className="truncate overflow-x-scroll">{message.subject}</CardDescription>
 										</CardHeader>
-										<CardFooter></CardFooter>
+										<CardContent>{new Date(message.last_updated * 1000).toLocaleString()}</CardContent>
 									</Card>
 								))}
 							</SheetContent>
@@ -84,10 +87,10 @@ export default function Navigation({
 					</div>
 					<div className="flex-1">
 						<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-							{navItems.map((item) => (
-								<NavLink key={item.href} href={item.href}>
-									<item.Icon className="h-5 w-5" />
-									{item.label}
+							{navItems.map(({ href, Icon, label }) => (
+								<NavLink key={href} href={href}>
+									<Icon className="h-5 w-5" />
+									{label}
 								</NavLink>
 							))}
 						</nav>
@@ -111,6 +114,25 @@ export default function Navigation({
 								</Card>
 							</PopoverTrigger>
 							<PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] rounded-lg">
+								<Button
+									variant="ghost"
+									className="w-full flex justify-start"
+									onClick={() =>
+										setTheme(
+											themes[
+												themes.indexOf(theme as string) < themes.length - 1 ? themes.indexOf(theme as string) + 1 : 0
+											],
+										)
+									}
+								>
+									<SunIcon className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 mr-2 size-4" />
+									<MoonIcon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 mr-2 size-4" />
+									{theme
+										?.split("_")
+										.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+										.join(" ")}
+								</Button>
+
 								<Button variant="ghost" className="w-full flex justify-start" asChild>
 									<a
 										href="https://github.com/incognitotgt/schoology-frontend"

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 
 const fontSans = Inter({ subsets: ["latin"] });
-// const fontMono = JetBrains_Mono();
+const fontMono = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
 
 export const metadata: Metadata = {
 	title: "Schoology",
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${fontSans.className} h-screen`}>
+			<body className={`${fontSans.className} ${fontMono.variable} h-screen`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"

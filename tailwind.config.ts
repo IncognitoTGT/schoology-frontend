@@ -69,7 +69,7 @@ const config = {
 			},
 			fontFamily: {
 				sans: ["Inter"],
-				mono: ["JetBrains Mono"],
+				mono: ["var(--mono)"],
 			},
 		},
 	},

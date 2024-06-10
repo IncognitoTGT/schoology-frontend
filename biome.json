@@ -17,7 +17,10 @@
 		"enabled": true,
 		"ignore": ["**/pnpm-lock.yaml", "**/.next/**", "**/node_modules/**"],
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"suspicious": {
+				"noExplicitAny": "off"
+			}
 		}
 	},
 	"javascript": {

@@ -5,7 +5,7 @@ const nextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "asset-cdn.schoology.com",
+				hostname: "*.schoology.com",
 				port: "",
 				pathname: "/**",
 			},
