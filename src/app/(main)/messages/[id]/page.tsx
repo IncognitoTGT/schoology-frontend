@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipContent, TooltipTrigger, Tooltip } from "@/components/ui/tooltip";
+import { md5 } from "js-md5";
 import { getSchoology } from "@/lib/schoology";
 import { DownloadIcon, FileIcon, Link1Icon, PaperPlaneIcon } from "@radix-ui/react-icons";
 import { revalidatePath } from "next/cache";
@@ -55,21 +56,36 @@ export default async function Page({ params }: { params: { id: string } }) {
 									<CardDescription>{new Date(message.last_updated * 1000).toLocaleString()}</CardDescription>
 								</CardHeader>
 								<CardContent>{message.message}</CardContent>
-								<CardFooter className="gap-2">
-									{message.attachments?.files.file
-										? message.attachments.files.file.map((file: any) => (
-												<Card key={file.id} className="flex justify-start items-center p-4 h-16 w-auto gap-4">
-													<FileIcon className="size-5 flex-shrink-0" />
-													<span className="text-sm truncate overflow-x-scroll">{file.filename}</span>
-													<Button size="icon" className="flex-shrink-0" asChild>
-														<a download={file.filename} href={`/api${file.download_path.split("v1")[1]}`}>
-															<DownloadIcon className="size-4" />
-														</a>
-													</Button>
+								{message.attachments ? (
+									<CardFooter className="gap-2">
+										{message.attachments.links?.link.map((link: any) => (
+											<a key={link.id} href={link.url} target="_blank" rel="noreferrer">
+												<Card key={link.id} className="hover:bg-secondary/70">
+													<CardHeader>
+														<CardTitle className="truncate flex gap-2 items-center">
+															<Link1Icon className="size-5 flex-shrink-0 inline" />
+															{link.title}
+														</CardTitle>
+														<CardDescription>{link.url}</CardDescription>
+													</CardHeader>
 												</Card>
-											))
-										: null}
-								</CardFooter>
+											</a>
+										))}
+										{message.attachments.files?.file
+											? message.attachments.files.file.map((file: any) => (
+													<Card key={file.id} className="flex justify-start items-center p-4 h-16 w-auto gap-4">
+														<FileIcon className="size-5 flex-shrink-0" />
+														<span className="text-sm truncate overflow-x-scroll">{file.filename}</span>
+														<Button size="icon" className="flex-shrink-0" asChild>
+															<a download={file.filename} href={`/api${file.download_path.split("v1")[1]}`}>
+																<DownloadIcon className="size-4" />
+															</a>
+														</Button>
+													</Card>
+												))
+											: null}
+									</CardFooter>
+								) : null}
 							</div>
 							{index >= 0 && index !== messages.length - 1 ? <Separator /> : null}
 						</Fragment>
@@ -78,7 +94,24 @@ export default async function Page({ params }: { params: { id: string } }) {
 						action={async (data: FormData) => {
 							"use server";
 							const message = data.get("message")?.toString();
+							const file = data.get("file") as File | null;
 							const schoology = getSchoology();
+							let upload: any;
+							if (file) {
+								const uploadReq = await schoology("/upload", {
+									method: "POST",
+									body: JSON.stringify({
+										filename: file.name,
+										filesize: file.size,
+										md5_checksum: md5(await file.arrayBuffer()),
+									}),
+								});
+								upload = await schoology(uploadReq.result.upload_location.split("v1")[1], {
+									method: "PUT",
+									body: await file.arrayBuffer(),
+									contentType: file.type,
+								});
+							}
 							if (message) {
 								await schoology(`/messages/${params.id}`, {
 									method: "POST",
@@ -86,9 +119,15 @@ export default async function Page({ params }: { params: { id: string } }) {
 										subject: messages[0].subject,
 										message,
 										recipient_ids: messages[0].recipient_ids,
+										"file-attachment": upload
+											? {
+													id: [upload.id],
+												}
+											: undefined,
 									}),
 								});
 							}
+
 							revalidatePath("/messages");
 						}}
 						className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring w-full"
