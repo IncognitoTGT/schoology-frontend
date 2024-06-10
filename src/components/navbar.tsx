@@ -21,6 +21,7 @@ import type { IconProps } from "@radix-ui/react-icons/dist/types";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import Image from "next/image";
 export default function Navigation({
 	school,
 	user,
@@ -74,13 +75,24 @@ export default function Navigation({
 									<SheetTitle>Messages</SheetTitle>
 								</SheetHeader>
 								{messages.message.map((message: any, index: number) => (
-									<Card key={message.id} className="w-full h-auto">
-										<CardHeader>
-											<CardTitle>{messageSenders[index].name_display}</CardTitle>
-											<CardDescription className="truncate overflow-x-scroll">{message.subject}</CardDescription>
-										</CardHeader>
-										<CardContent>{new Date(message.last_updated * 1000).toLocaleString()}</CardContent>
-									</Card>
+									<Link key={message.id} href={`/messages/${message.id}`}>
+										<Card className="w-full h-32 hover:bg-secondary/70">
+											<CardHeader>
+												<CardTitle className="truncate flex gap-2 items-center">
+													<Image
+														src={messageSenders[index].picture_url}
+														alt="profile"
+														width={170}
+														height={170}
+														className="rounded-full aspect-square bg-cover bg-center object-cover size-4 inline"
+													/>
+													{messageSenders[index].name_display}
+												</CardTitle>
+												<CardDescription className="truncate overflow-x-scroll">{message.subject}</CardDescription>
+												<CardDescription>{new Date(message.last_updated * 1000).toLocaleString()}</CardDescription>
+											</CardHeader>
+										</Card>
+									</Link>
 								))}
 							</SheetContent>
 						</Sheet>

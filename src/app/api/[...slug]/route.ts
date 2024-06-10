@@ -1,8 +1,16 @@
 import { getSchoology } from "@/lib/schoology";
 import type { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { slug: string[] } }) {
-	const schoology = getSchoology();
-	const res = await schoology(`/${params.slug.join("/")}?${req.nextUrl.searchParams.toString()}`);
-	return Response.json(res);
-}
+export const GET = async (req: NextRequest, { params }: { params: { slug: string[] } }) =>
+	getSchoology()(`/${params.slug.join("/")}?${req.nextUrl.searchParams.toString()}`, {
+		returns: "response",
+		method: "GET",
+		contentType: req.headers.get("content-type") || "application/json",
+	});
+export const POST = async (req: NextRequest, { params }: { params: { slug: string[] } }) =>
+	getSchoology()(`/${params.slug.join("/")}?${req.nextUrl.searchParams.toString()}`, {
+		returns: "response",
+		method: "POST",
+		body: req.body,
+		contentType: req.headers.get("content-type") || "application/json",
+	});

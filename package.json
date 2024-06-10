@@ -25,8 +25,8 @@
 		"next": "15.0.0-rc.0",
 		"next-themes": "^0.3.0",
 		"oauth-1.0a": "^2.2.6",
-		"react": "19.0.0-rc-f994737d14-20240522",
-		"react-dom": "19.0.0-rc-f994737d14-20240522",
+		"react": "19.0.0-rc-cc1ec60d0d-20240607",
+		"react-dom": "19.0.0-rc-cc1ec60d0d-20240607",
 		"sonner": "^1.4.41",
 		"tailwind-merge": "^2.3.0",
 		"tailwindcss-animate": "^1.0.7",
@@ -35,8 +35,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.7.3",
 		"@types/node": "^20",
-		"@types/react": "^18",
-		"@types/react-dom": "^18",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
 		"postcss": "^8",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5"

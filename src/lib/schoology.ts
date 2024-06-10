@@ -7,6 +7,7 @@ import OAuth from "oauth-1.0a";
  **/
 type SchoologyRequestInit = RequestInit & {
 	contentType?: string | undefined;
+	returns?: "json" | "text" | "blob" | "response";
 };
 /**
  * @param path Request path
@@ -30,7 +31,7 @@ export function getSchoology(): SchoologyInstance {
 		Accept: "application/json",
 		...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
 	});
-	return (async (path: string, { contentType, ...options }: SchoologyRequestInit | undefined = {}) => {
+	return (async (path: string, { contentType, returns, ...options }: SchoologyRequestInit | undefined = {}) => {
 		const responseOpts = (): RequestInit => ({
 			...options,
 			headers: headers(contentType),
@@ -43,6 +44,9 @@ export function getSchoology(): SchoologyInstance {
 		if ([401, 403].includes(res.status)) {
 			return { error: await res.text() };
 		}
-		return res.json();
+		if (returns === "response") {
+			return res;
+		}
+		return res[returns || "json"]();
 	}) as SchoologyInstance;
 }

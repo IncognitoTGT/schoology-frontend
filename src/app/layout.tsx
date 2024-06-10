@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const fontSans = Inter({ subsets: ["latin"] });
 const fontMono = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
@@ -27,7 +28,7 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					{children}
+					<TooltipProvider>{children}</TooltipProvider>
 					<Toaster richColors theme="system" position="top-center" />
 				</ThemeProvider>
 			</body>

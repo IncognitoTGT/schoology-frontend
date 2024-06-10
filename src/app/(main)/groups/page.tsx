@@ -5,23 +5,23 @@ import Image from "next/image";
 
 export default async function Page() {
 	const schoology = getSchoology();
-	const { section }: { section: any[] } = await schoology(`/users/${cookies().get("userId")?.value}/sections`);
+	const { group }: { group: any[] } = await schoology(`/users/${cookies().get("userId")?.value}/groups`);
 	return (
 		<main className="flex h-full flex-col text-wrap">
 			<section className="flex items-center justify-start mt-4 ml-12 pt-4 pb-1">
-				<h1 className="text-4xl font-bold">Courses</h1>
+				<h1 className="text-4xl font-bold">Groups</h1>
 			</section>
 			<section className=" grid-rows-subgrid gap-4 3xl:grid-cols-6 4xl:grid-cols-7 grid place-content-center place-items-center p-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-				{section.map((section: any) => (
-					<Card key={section.id} className="h-64 w-72 flex flex-col justify-center">
+				{group.map((group: any) => (
+					<Card key={group.id} className="h-64 w-72 flex flex-col justify-center">
 						<CardHeader>
-							<CardTitle className="truncate">{section.course_title}</CardTitle>
-							<CardDescription>{section.section_title}</CardDescription>
-							<CardDescription className="truncate">{section.description}</CardDescription>
+							<CardTitle className="truncate">{group.title}</CardTitle>
+							<CardDescription>{group.section_title}</CardDescription>
+							<CardDescription className="truncate">{group.description}</CardDescription>
 						</CardHeader>
 						<CardContent className=" flex flex-col items-center justify-start">
 							<Image
-								src={section.profile_url}
+								src={group.picture_url}
 								alt="profile"
 								width={750}
 								height={375}

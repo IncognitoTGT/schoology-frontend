@@ -19,7 +19,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
 	return (
 		<>
 			<Navigation school={school} user={user} messages={messages} messageSenders={messageSenders} />
-			<div className="h-full lg:ml-72 ml-56 overflow-y-clip">{children}</div>
+			<div className="h-full lg:ml-72 ml-56 overflow-x-clip overflow-y-scroll">{children}</div>
 		</>
 	);
 }

@@ -8,7 +8,7 @@ import { getSchoology } from "@/lib/schoology";
 import type { Credentials } from "@/types/cookies";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { cookies } from "next/headers";
-import { redirect, unstable_rethrow } from "next/navigation";
+import { redirect } from "next/navigation";
 import DistrictDialog from "./page.client";
 
 export default function Index({
