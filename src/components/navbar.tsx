@@ -1,11 +1,13 @@
 "use client";
 import { signOut } from "@/actions/accounts";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavLink } from "@/components/ui/nav-link";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { NavLink } from "./ui/nav-link";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
+	// CaretSortIcon,
+	// CheckIcon,
 	EnvelopeClosedIcon,
 	EnvelopeOpenIcon,
 	ExitIcon,
@@ -14,6 +16,7 @@ import {
 	MoonIcon,
 	Pencil2Icon,
 	PersonIcon,
+	// PlusCircledIcon,
 	RocketIcon,
 	SunIcon,
 } from "@radix-ui/react-icons";
@@ -22,6 +25,15 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger} from "./ui/dialog";
+// import { DialogTitle } from "@radix-ui/react-dialog";
+// import { Label } from "./ui/label";
+// import { Input } from "./ui/input";
+// import { Textarea } from "./ui/textarea";
+// import { cn } from "@/lib/utils";
+// import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 export default function Navigation({
 	school,
 	user,
@@ -29,6 +41,11 @@ export default function Navigation({
 	messageSenders,
 }: { school: any; user: any; messages: any; messageSenders: any[] }) {
 	const { theme, themes, setTheme } = useTheme();
+	useEffect(() => {
+		if (messages.unread_count !== "0") toast(`You have ${messages.unread_count} unread messages`);
+	});
+	const [sheetOpen, setSheetOpen] = useState(false);
+	// const [toBoxOpen, setToBoxOpen] = useState(false);
 	const navItems: {
 		Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
 		label: string;
@@ -59,7 +76,7 @@ export default function Navigation({
 							<RocketIcon className="size-7" />
 							<span className="text-balance">{school.title}</span>
 						</Link>
-						<Sheet>
+						<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
 							<SheetTrigger asChild>
 								<Button variant="outline" size="icon" className="ml-auto h-8 w-8">
 									{messages.unread_count === "0" ? (
@@ -73,9 +90,67 @@ export default function Navigation({
 							<SheetContent className="w-[300px] overflow-scroll flex gap-2 flex-col" side="left">
 								<SheetHeader>
 									<SheetTitle>Messages</SheetTitle>
+									{/* <Dialog>
+										<DialogTrigger asChild>
+											<Button>
+												<PlusCircledIcon className="size-4 mr-2" />
+												New Message
+											</Button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>Send Message</DialogTitle>
+												<DialogDescription>Send a message to someone in your school</DialogDescription>
+											</DialogHeader>
+											<form className="flex flex-col gap-2 w-full">
+												<Label htmlFor="to">Recipients</Label>
+												<Popover open={toBoxOpen} onOpenChange={setToBoxOpen}>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															role="combobox"
+															aria-expanded={toBoxOpen}
+															className="w-[200px] justify-between"
+														>
+															Start searching
+															<CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-[200px] p-0">
+														<Command>
+															<CommandInput placeholder="Search framework..." />
+															<CommandEmpty>No framework found.</CommandEmpty>
+															<CommandGroup>
+																<CommandItem
+																	key={"rizz"}
+																	value={"rizz"}
+																	onSelect={() => {
+																		//   setValue(currentValue === value ? "" : currentValue)
+																		setToBoxOpen(false);
+																	}}
+																>
+																	<CheckIcon
+																		className={cn("mr-2 h-4 w-4", "rizz" === "rizdz" ? "opacity-100" : "opacity-0")}
+																	/>
+																	rizz
+																</CommandItem>
+															</CommandGroup>
+														</Command>
+													</PopoverContent>
+												</Popover>
+												<Label htmlFor="subject">Subject</Label>
+												<Input id="subject" placeholder="Subject" name="subject" required />
+												<Label htmlFor="message">Message</Label>
+												<Textarea id="message" placeholder="Message" name="message" required />
+												<Button type="submit" className="w-full">
+													Send
+												</Button>
+											</form>
+										</DialogContent>
+									</Dialog> */}
 								</SheetHeader>
 								{messages.message.map((message: any, index: number) => (
-									<Link key={message.id} href={`/messages/${message.id}`}>
+									<Link key={message.id} href={`/messages/inbox/${message.id}`} onClick={() => setSheetOpen(false)}>
 										<Card className="w-full h-32 hover:bg-secondary/70">
 											<CardHeader>
 												<CardTitle className="truncate flex gap-2 items-center">

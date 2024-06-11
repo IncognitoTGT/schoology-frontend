@@ -5,7 +5,7 @@ import OAuth from "oauth-1.0a";
 /**
  * @param contentType Request path
  **/
-type SchoologyRequestInit = RequestInit & {
+export type SchoologyRequestInit = RequestInit & {
 	contentType?: string | undefined;
 	returns?: "json" | "text" | "blob" | "response";
 };
@@ -14,7 +14,7 @@ type SchoologyRequestInit = RequestInit & {
  * @param options Request options
  * @returns The response from the API, either as a JSON object or an error message
  */
-type SchoologyInstance = (path: string, options?: SchoologyRequestInit | undefined) => Promise<any>;
+export type SchoologyInstance = (path: string, options?: SchoologyRequestInit | undefined) => Promise<any>;
 export function getSchoology(): SchoologyInstance {
 	const authCookie = cookies().get("credentials");
 	if (!authCookie) return redirect("/");

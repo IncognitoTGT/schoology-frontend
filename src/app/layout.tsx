@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const fontSans = Inter({ subsets: ["latin"] });
+const fontSans = Inter({ subsets: ["latin"], variable: "--sans" });
 const fontMono = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${fontSans.className} ${fontMono.variable} h-screen`}>
+			<body className={`${fontSans.variable} ${fontMono.variable} h-screen`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
