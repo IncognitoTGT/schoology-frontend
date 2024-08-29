@@ -1,9 +1,18 @@
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSchoology } from "@/lib/schoology";
 import Image from "next/image";
 
 export default async function Page({ params }: { params: { id: string } }) {
 	const schoology = getSchoology();
+	const group = await schoology(`/groups/${params.id}`);
 	const { update: updates }: { update: any[] } = await schoology(`/groups/${params.id}/updates`);
 	const updateSenders: any[] = (
 		await schoology("/multiget", {
@@ -17,6 +26,22 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 	return (
 		<main className="flex h-full flex-col text-wrap p-10 gap-2 mb-2">
+			<Breadcrumb className="mb-4">
+				<BreadcrumbList>
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/">Home</BreadcrumbLink>
+					</BreadcrumbItem>
+					<BreadcrumbSeparator />
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/groups">Groups</BreadcrumbLink>
+					</BreadcrumbItem>
+					<BreadcrumbSeparator />
+					<BreadcrumbItem>
+						<BreadcrumbPage>{group.title}</BreadcrumbPage>
+					</BreadcrumbItem>
+				</BreadcrumbList>
+			</Breadcrumb>
+
 			{updates.map((update) => (
 				<Card key={update.id} className="h-auto w-full flex flex-col justify-start">
 					<CardHeader>

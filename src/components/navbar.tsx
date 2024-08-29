@@ -1,13 +1,9 @@
 "use client";
 import { signOut } from "@/actions/accounts";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { NavLink } from "./ui/nav-link";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { cn } from "@/lib/utils";
 import {
-	// CaretSortIcon,
-	// CheckIcon,
+	CaretSortIcon,
+	CheckIcon,
 	EnvelopeClosedIcon,
 	EnvelopeOpenIcon,
 	ExitIcon,
@@ -16,24 +12,27 @@ import {
 	MoonIcon,
 	Pencil2Icon,
 	PersonIcon,
-	// PlusCircledIcon,
+	PlusCircledIcon,
 	RocketIcon,
 	SunIcon,
 } from "@radix-ui/react-icons";
 import type { IconProps } from "@radix-ui/react-icons/dist/types";
 import { useTheme } from "next-themes";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger} from "./ui/dialog";
-// import { DialogTitle } from "@radix-ui/react-dialog";
-// import { Label } from "./ui/label";
-// import { Input } from "./ui/input";
-// import { Textarea } from "./ui/textarea";
-// import { cn } from "@/lib/utils";
-// import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { NavLink } from "./ui/nav-link";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Textarea } from "./ui/textarea";
 export default function Navigation({
 	school,
 	user,
@@ -45,7 +44,20 @@ export default function Navigation({
 		if (messages.unread_count !== "0") toast(`You have ${messages.unread_count} unread messages`);
 	});
 	const [sheetOpen, setSheetOpen] = useState(false);
-	// const [toBoxOpen, setToBoxOpen] = useState(false);
+	const [toBoxOpen, setToBoxOpen] = useState(false);
+	const [search, setSearch] = useState("");
+	const [autoComplete, setAutoComplete] = useState([]);
+	const [value, setValue] = useState<any | null>(null);
+	useEffect(() => {
+		(async () => {
+			if (toBoxOpen && search.length > 0) {
+				const {
+					users: { search_result },
+				} = await (await fetch(`/api/search?keywords=${search}&type=user`)).json();
+				setAutoComplete(search_result);
+			}
+		})();
+	}, [toBoxOpen, search]);
 	const navItems: {
 		Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
 		label: string;
@@ -90,7 +102,7 @@ export default function Navigation({
 							<SheetContent className="w-[300px] overflow-scroll flex gap-2 flex-col" side="left">
 								<SheetHeader>
 									<SheetTitle>Messages</SheetTitle>
-									{/* <Dialog>
+									<Dialog>
 										<DialogTrigger asChild>
 											<Button>
 												<PlusCircledIcon className="size-4 mr-2" />
@@ -112,28 +124,26 @@ export default function Navigation({
 															aria-expanded={toBoxOpen}
 															className="w-[200px] justify-between"
 														>
-															Start searching
+															{value?.name || "Search for a teacher"}
 															<CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 														</Button>
 													</PopoverTrigger>
 													<PopoverContent className="w-[200px] p-0">
 														<Command>
-															<CommandInput placeholder="Search framework..." />
-															<CommandEmpty>No framework found.</CommandEmpty>
+															<CommandInput placeholder="Search" onValueChange={setSearch} />
+															<CommandEmpty>No user found.</CommandEmpty>
 															<CommandGroup>
-																<CommandItem
-																	key={"rizz"}
-																	value={"rizz"}
-																	onSelect={() => {
-																		//   setValue(currentValue === value ? "" : currentValue)
-																		setToBoxOpen(false);
-																	}}
-																>
-																	<CheckIcon
-																		className={cn("mr-2 h-4 w-4", "rizz" === "rizdz" ? "opacity-100" : "opacity-0")}
-																	/>
-																	rizz
-																</CommandItem>
+																{autoComplete?.map((user: any) => (
+																	<CommandItem
+																		key={user.uid}
+																		onSelect={() => {
+																			setValue(user.id);
+																			setSearch(user.name_display);
+																		}}
+																	>
+																		{user.name}
+																	</CommandItem>
+																))}
 															</CommandGroup>
 														</Command>
 													</PopoverContent>
@@ -147,21 +157,21 @@ export default function Navigation({
 												</Button>
 											</form>
 										</DialogContent>
-									</Dialog> */}
+									</Dialog>
 								</SheetHeader>
-								{messages.message.map((message: any, index: number) => (
+								{messages.message.map((message: any) => (
 									<Link key={message.id} href={`/messages/inbox/${message.id}`} onClick={() => setSheetOpen(false)}>
 										<Card className="w-full h-32 hover:bg-secondary/70">
 											<CardHeader>
 												<CardTitle className="truncate flex gap-2 items-center">
 													<Image
-														src={messageSenders[index].picture_url}
+														src={messageSenders.find((m) => message.author_id === m.id).picture_url}
 														alt="profile"
 														width={170}
 														height={170}
 														className="rounded-full aspect-square bg-cover bg-center object-cover size-4 inline"
 													/>
-													{messageSenders[index].name_display}
+													{messageSenders.find((m) => message.author_id === m.id).name_display}
 												</CardTitle>
 												<CardDescription className="truncate overflow-x-scroll">{message.subject}</CardDescription>
 												<CardDescription>{new Date(message.last_updated * 1000).toLocaleString()}</CardDescription>
@@ -188,7 +198,14 @@ export default function Navigation({
 								<Card className="flex items-center justify-center flex-row hover:bg-background/10 duration-150 cursor-pointer">
 									<CardContent className="p-2 pt-0 md:p-4">
 										<Avatar>
-											<AvatarImage src={`/_next/image?url=${encodeURIComponent(user.picture_url)}&w=64&q=64`} />
+											<AvatarImage
+												{...getImageProps({
+													src: user.picture_url,
+													width: 60,
+													height: 60,
+													alt: "Profile picture",
+												}).props}
+											/>
 											<AvatarFallback>
 												{user.name_display.split(" ")[0].charAt(0) + user.name_display.split(" ")[1].charAt(0)}
 											</AvatarFallback>

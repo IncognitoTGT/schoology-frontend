@@ -3,16 +3,17 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import OAuth from "oauth-1.0a";
 /**
- * @param contentType Request path
+ * @param contentType Content type of the request
+ * @param returns Type of response to return
  **/
-export type SchoologyRequestInit = RequestInit & {
+export type SchoologyRequestInit = Omit<RequestInit, "headers"> & {
 	contentType?: string | undefined;
-	returns?: "json" | "text" | "blob" | "response";
+	returns?: "json" | "text" | "blob" | "arrayBuffer" | "formData" | "response";
 };
 /**
  * @param path Request path
  * @param options Request options
- * @returns The response from the API, either as a JSON object or an error message
+ * @returns The response from the API
  */
 export type SchoologyInstance = (path: string, options?: SchoologyRequestInit | undefined) => Promise<any>;
 export function getSchoology(): SchoologyInstance {
@@ -26,15 +27,14 @@ export function getSchoology(): SchoologyInstance {
 		realm: "Schoology API",
 		hash_function: (_base_string, key) => key,
 	});
-	const headers = (contentType?: string | undefined) => ({
-		"Content-Type": contentType || "application/json",
-		Accept: "application/json",
-		...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
-	});
-	return (async (path: string, { contentType, returns, ...options }: SchoologyRequestInit | undefined = {}) => {
+	return async (path: string, { contentType, returns, ...options }: SchoologyRequestInit | undefined = {}) => {
 		const responseOpts = (): RequestInit => ({
 			...options,
-			headers: headers(contentType),
+			headers: {
+				"Content-Type": contentType || "application/json",
+				Accept: "application/json",
+				...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
+			},
 		});
 		let res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
 		if (res.status === 429) {
@@ -45,8 +45,8 @@ export function getSchoology(): SchoologyInstance {
 			return { error: await res.text() };
 		}
 		if (returns === "response") {
-			return res;
+			return res as Response;
 		}
 		return res[returns || "json"]();
-	}) as SchoologyInstance;
+	};
 }

@@ -1,9 +1,11 @@
+import "./supress-logs";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "next-themes";
+import SupressLogs from "./supress-logs.client";
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--sans" });
 const fontMono = JetBrains_Mono({ subsets: ["latin"], variable: "--mono" });
@@ -21,6 +23,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${fontSans.variable} ${fontMono.variable} h-screen`}>
+				<SupressLogs />
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
