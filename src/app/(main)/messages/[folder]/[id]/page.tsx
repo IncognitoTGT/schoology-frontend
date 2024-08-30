@@ -1,3 +1,4 @@
+import { ClientDate } from "@/components/date";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -99,7 +100,9 @@ export default async function Page({ params }: { params: { id: string; folder: s
 										/>
 										{messageRecipients.find((val) => val.id === message.author_id).name_display}
 									</div>
-									<CardDescription>{new Date(message.last_updated * 1000).toLocaleString()}</CardDescription>
+									<CardDescription>
+										<ClientDate>{new Date(message.last_updated * 1000).toLocaleString()}</ClientDate>
+									</CardDescription>
 								</CardHeader>
 								<CardContent>{message.message}</CardContent>
 								{message.attachments ? (

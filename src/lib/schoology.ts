@@ -5,10 +5,12 @@ import OAuth from "oauth-1.0a";
 /**
  * @param contentType Content type of the request
  * @param returns Type of response to return
+ * @param disableCompression Disable compression for the request
  **/
 export type SchoologyRequestInit = Omit<RequestInit, "headers"> & {
 	contentType?: string | undefined;
 	returns?: "json" | "text" | "blob" | "arrayBuffer" | "formData" | "response";
+	disableCompression?: boolean;
 };
 /**
  * @param path Request path
@@ -27,18 +29,22 @@ export function getSchoology(): SchoologyInstance {
 		realm: "Schoology API",
 		hash_function: (_base_string, key) => key,
 	});
-	return async (path: string, { contentType, returns, ...options }: SchoologyRequestInit | undefined = {}) => {
+	return async (
+		path: string,
+		{ contentType, returns, disableCompression = false, ...options }: SchoologyRequestInit | undefined = {},
+	) => {
 		const responseOpts = (): RequestInit => ({
 			...options,
 			headers: {
 				"Content-Type": contentType || "application/json",
 				Accept: "application/json",
+				...(disableCompression ? { "Accept-Encoding": "identity" } : {}),
 				...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
 			},
 		});
 		let res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
 		if (res.status === 429) {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
+			await new Promise((resolve) => setTimeout(resolve, 3000));
 			res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
 		}
 		if ([401, 403].includes(res.status)) {

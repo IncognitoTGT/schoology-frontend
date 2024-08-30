@@ -1,3 +1,4 @@
+import { ClientDate } from "@/components/date";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -6,8 +7,11 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSchoology } from "@/lib/schoology";
+import { HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
+import { revalidatePath } from "next/cache";
 import Image from "next/image";
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -41,7 +45,6 @@ export default async function Page({ params }: { params: { id: string } }) {
 					</BreadcrumbItem>
 				</BreadcrumbList>
 			</Breadcrumb>
-
 			{updates.map((update) => (
 				<Card key={update.id} className="h-auto w-full flex flex-col justify-start">
 					<CardHeader>
@@ -58,9 +61,36 @@ export default async function Page({ params }: { params: { id: string } }) {
 							/>
 							{updateSenders.find((val) => val?.id === update.uid)?.name_display || update.uid}
 						</CardTitle>
-						<CardDescription>{new Date(update.created * 1000).toLocaleString()}</CardDescription>
+						<CardDescription>
+							<ClientDate>{new Date(update.created * 1000).toLocaleString()}</ClientDate>
+						</CardDescription>
 					</CardHeader>
 					<CardContent>{update.body}</CardContent>
+					<CardFooter>
+						<form
+							action={async () => {
+								"use server";
+								const schoology = getSchoology();
+								const res = await schoology(`/like/${update.id}`, {
+									method: "POST",
+									body: JSON.stringify({
+										id: params.id,
+										like_action: !update.user_like_action,
+									}),
+								});
+								revalidatePath(`/groups/${params.id}`);
+							}}
+						>
+							<Button variant={update.user_like_action ? "default" : "outline"} type="submit">
+								{update.user_like_action ? (
+									<HeartFilledIcon className="size-6 mr-2" />
+								) : (
+									<HeartIcon className="size-6 mr-2" />
+								)}
+								{update.likes}
+							</Button>
+						</form>
+					</CardFooter>
 				</Card>
 			))}
 		</main>

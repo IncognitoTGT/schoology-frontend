@@ -1,9 +1,8 @@
 "use client";
 import { signOut } from "@/actions/accounts";
-import { cn } from "@/lib/utils";
+import useQuery from "@/hooks/use-query";
+import { fetcher } from "@/lib/utils";
 import {
-	CaretSortIcon,
-	CheckIcon,
 	EnvelopeClosedIcon,
 	EnvelopeOpenIcon,
 	ExitIcon,
@@ -22,10 +21,10 @@ import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { AutoComplete } from "./ui/autocomplete";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -38,26 +37,23 @@ export default function Navigation({
 	user,
 	messages,
 	messageSenders,
-}: { school: any; user: any; messages: any; messageSenders: any[] }) {
+}: {
+	school: any;
+	user: any;
+	messages: any;
+	messageSenders: any[];
+}) {
 	const { theme, themes, setTheme } = useTheme();
 	useEffect(() => {
 		if (messages.unread_count !== "0") toast(`You have ${messages.unread_count} unread messages`);
 	});
 	const [sheetOpen, setSheetOpen] = useState(false);
-	const [toBoxOpen, setToBoxOpen] = useState(false);
-	const [search, setSearch] = useState("");
-	const [autoComplete, setAutoComplete] = useState([]);
 	const [value, setValue] = useState<any | null>(null);
-	useEffect(() => {
-		(async () => {
-			if (toBoxOpen && search.length > 0) {
-				const {
-					users: { search_result },
-				} = await (await fetch(`/api/search?keywords=${search}&type=user`)).json();
-				setAutoComplete(search_result);
-			}
-		})();
-	}, [toBoxOpen, search]);
+	const [search, setSearch] = useState("");
+	const { query, fetchQuery, loading } = useQuery<any>(
+		"/api/search?type=user&keywords={query}",
+		async (...args: Parameters<typeof fetcher>) => (await fetcher(...args)).users.search_result,
+	);
 	const navItems: {
 		Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
 		label: string;
@@ -116,38 +112,25 @@ export default function Navigation({
 											</DialogHeader>
 											<form className="flex flex-col gap-2 w-full">
 												<Label htmlFor="to">Recipients</Label>
-												<Popover open={toBoxOpen} onOpenChange={setToBoxOpen}>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															role="combobox"
-															aria-expanded={toBoxOpen}
-															className="w-[200px] justify-between"
-														>
-															{value?.name || "Search for a teacher"}
-															<CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-[200px] p-0">
-														<Command>
-															<CommandInput placeholder="Search" onValueChange={setSearch} />
-															<CommandEmpty>No user found.</CommandEmpty>
-															<CommandGroup>
-																{autoComplete?.map((user: any) => (
-																	<CommandItem
-																		key={user.uid}
-																		onSelect={() => {
-																			setValue(user.id);
-																			setSearch(user.name_display);
-																		}}
-																	>
-																		{user.name}
-																	</CommandItem>
-																))}
-															</CommandGroup>
-														</Command>
-													</PopoverContent>
-												</Popover>
+												<AutoComplete
+													id="to"
+													selectedValue={value}
+													onSelectedValueChange={setValue}
+													isLoading={loading}
+													searchValue={search}
+													onSearchValueChange={(v) => {
+														setSearch(v);
+														if (v.length > 3) {
+															fetchQuery(v);
+														}
+													}}
+													items={(query || []).map((user) => ({
+														label: user.name,
+														value: user.uid,
+													}))}
+													placeholder="Search for a user"
+													emptyMessage={search.length >= 3 ? "Search for a user" : "No users found"}
+												/>
 												<Label htmlFor="subject">Subject</Label>
 												<Input id="subject" placeholder="Subject" name="subject" required />
 												<Label htmlFor="message">Message</Label>
@@ -231,10 +214,7 @@ export default function Navigation({
 								>
 									<SunIcon className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 mr-2 size-4" />
 									<MoonIcon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 mr-2 size-4" />
-									{theme
-										?.split("_")
-										.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-										.join(" ")}
+									{`${theme?.charAt(0).toUpperCase()}${theme?.slice(1)}`}
 								</Button>
 
 								<Button variant="ghost" className="w-full flex justify-start" asChild>
