@@ -44,13 +44,16 @@ export async function getSchoology(): Promise<SchoologyInstance> {
 		path: string,
 		{ contentType, returns, disableCompression = false, ...options }: SchoologyRequestInit | undefined = {},
 	) => {
+		const method = options.method || "GET";
 		const responseOpts = (): RequestInit => ({
-			...options,
+      ...options,
+      // @ts-expect-error stfu
+			duplex: 'half',
 			headers: {
 				"Content-Type": contentType || "application/json",
 				Accept: "application/json",
 				...(disableCompression ? { "Accept-Encoding": "identity" } : {}),
-				...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method: "GET" })),
+				...oauth.toHeader(oauth.authorize({ url: "https://api.schoology.com", method })),
 			},
 		});
 		let res = await fetch(`https://api.schoology.com/v1${path}`, responseOpts());
