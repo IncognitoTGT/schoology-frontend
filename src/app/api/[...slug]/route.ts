@@ -15,3 +15,10 @@ export const POST = async (req: NextRequest, { params }: Props) =>
 		body: req.body,
 		disableCompression: true,
 	});
+export const PUT = async (req: NextRequest, { params }: Props) =>
+	(await getSchoology())(`/${(await params).slug.join("/")}?${req.nextUrl.searchParams.toString()}`, {
+		returns: "response",
+		method: "POST",
+		body: req.body,
+		disableCompression: true,
+	});
