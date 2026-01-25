@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest, { params }: Props) =>
 export const PUT = async (req: NextRequest, { params }: Props) =>
 	(await getSchoology())(`/${(await params).slug.join("/")}?${req.nextUrl.searchParams.toString()}`, {
 		returns: "response",
-		method: "POST",
+		method: "PUT",
 		body: req.body,
 		disableCompression: true,
 	});
